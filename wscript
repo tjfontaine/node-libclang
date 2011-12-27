@@ -29,6 +29,7 @@ def build(bld):
     "src/index.cc",
     "src/translation.cc",
     "src/ncursor.cc",
+    "src/constants.cc",
   ]
   obj.uselib = ['LLVM']
 

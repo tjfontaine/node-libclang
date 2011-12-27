@@ -1,12 +1,14 @@
 #include <cstdlib>
 #include "ncursor.h"
 #include "nstring.h"
+#include "constants.h"
 
 using namespace v8;
 using namespace node;
 using namespace nclang;
 
 #define USR String::NewSymbol("usr")
+#define KIND String::NewSymbol("kind")
 
 NCursor*
 NCursor::New(CXCursor cx)
@@ -67,12 +69,17 @@ StringGetter(Local<String> property, const AccessorInfo& info)
 {
   HandleScope scope;
   NCursor *c = ObjectWrap::Unwrap<NCursor>(info.This());
-  CXString s;
 
   if (USR == property)
-    s = clang_getCursorUSR(c->opaque_);
+    return scope.Close(from_string(clang_getCursorUSR(c->opaque_)));
+  else if (KIND == property)
+  {
+    CXCursorKind k = clang_getCursorKind(c->opaque_);
+    Local<Value> ki = Integer::New(k);
+    return scope.Close(ki);
+  }
   
-  return scope.Close(from_string(s));
+  return info.This();
 }
 
 Persistent<FunctionTemplate> NCursor::Klass;
@@ -85,7 +92,11 @@ NCursor::Initialize(Handle<Object> target)
   Klass = Persistent<FunctionTemplate>::New(t);
 
   Klass->InstanceTemplate()->SetInternalFieldCount(1);
+
   NODE_SET_PROTOTYPE_METHOD(Klass, "visitChildren", Visit);
+
   Klass->PrototypeTemplate()->SetAccessor(USR, StringGetter);
+  Klass->PrototypeTemplate()->SetAccessor(KIND, StringGetter);
+
   target->Set(String::NewSymbol("cursor"), Klass->GetFunction());
 }

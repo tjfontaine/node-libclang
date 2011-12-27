@@ -4,13 +4,7 @@
 #include <node.h>
 #include <clang-c/Index.h>
 
-void
-ConstantsInitialize(v8::Handle<v8::Object> target)
-{
-  NODE_DEFINE_CONSTANT(target, CXChildVisit_Break);
-  NODE_DEFINE_CONSTANT(target, CXChildVisit_Continue);
-  NODE_DEFINE_CONSTANT(target, CXChildVisit_Recurse);
+static v8::Persistent<v8::Object> KINDS;
+void ConstantsInitialize(v8::Handle<v8::Object> target);
 
-  //NODE_DEFINE_CONSTANT(target,);
-}
 #endif
