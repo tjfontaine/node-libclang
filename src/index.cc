@@ -9,7 +9,7 @@ Index::New(const Arguments &args)
 {
   HandleScope scope;
   Index *i = new Index();
-  i->opaque_ = clang_createIndex(0, 0);
+  i->opaque_ = clang_createIndex(1, 1);
   i->Wrap(args.This());
   return args.This();
 }

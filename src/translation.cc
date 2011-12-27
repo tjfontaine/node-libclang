@@ -21,12 +21,9 @@ TranslationUnit::getCursor(const Arguments &args)
   HandleScope scope;
   TranslationUnit *tu = ObjectWrap::Unwrap<TranslationUnit>(args.This());
 
-  NCursor *curs = new NCursor();
-  curs->opaque_ = clang_getTranslationUnitCursor(tu->opaque_);
-  Local<Object> obj;
-  curs->Wrap(obj);
+  NCursor *n = NCursor::New(clang_getTranslationUnitCursor(tu->opaque_));
 
-  return scope.Close(obj);
+  return scope.Close(n->handle_);
 }
 
 Handle<Value>
@@ -45,7 +42,7 @@ TranslationUnit::Source(const Arguments &args)
   Index *i = ObjectWrap::Unwrap<Index>(args[0]->ToObject());
   String::Utf8Value s(args[1]->ToString());
 
-  char *argv[] = { "-Xclang" };
+  char *argv[] = { "-I/usr/include/linux" };
   tu->opaque_ = clang_createTranslationUnitFromSourceFile(i->opaque_, *s, 1, argv, 0, 0);
 
   return args.This();

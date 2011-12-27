@@ -1,6 +1,7 @@
 #include "index.h"
 #include "translation.h"
 #include "ncursor.h"
+#include "constants.h"
 
 using namespace v8;
 using namespace node;
@@ -10,6 +11,7 @@ extern "C" void
 init (Handle<Object> target)
 {
   HandleScope scope;
+  ConstantsInitialize(target);
   Index::Initialize(target);
   TranslationUnit::Initialize(target);
   NCursor::Initialize(target);
