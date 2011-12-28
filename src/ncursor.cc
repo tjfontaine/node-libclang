@@ -2,6 +2,7 @@
 #include "ncursor.h"
 #include "nstring.h"
 #include "constants.h"
+#include "type.h"
 
 using namespace v8;
 using namespace node;
@@ -9,6 +10,9 @@ using namespace nclang;
 
 #define USR String::NewSymbol("usr")
 #define KIND String::NewSymbol("kind")
+#define SPELL String::NewSymbol("spelling")
+#define DISPLAY String::NewSymbol("displayname")
+#define TYPE String::NewSymbol("type")
 
 NCursor*
 NCursor::New(CXCursor cx)
@@ -65,21 +69,30 @@ NCursor::Visit(const Arguments &args)
 }
 
 static Handle<Value>
-StringGetter(Local<String> property, const AccessorInfo& info)
+Getter(Local<String> property, const AccessorInfo& info)
 {
   HandleScope scope;
   NCursor *c = ObjectWrap::Unwrap<NCursor>(info.This());
 
   if (USR == property)
     return scope.Close(from_string(clang_getCursorUSR(c->opaque_)));
+  else if (SPELL == property)
+    return scope.Close(from_string(clang_getCursorSpelling(c->opaque_)));
+  else if (DISPLAY == property)
+    return scope.Close(from_string(clang_getCursorDisplayName(c->opaque_)));
   else if (KIND == property)
   {
     CXCursorKind k = clang_getCursorKind(c->opaque_);
     Local<Value> ki = Integer::New(k);
     return scope.Close(ki);
   }
+  else if (TYPE == property)
+  {
+    Type *t = Type::New(clang_getCursorType(c->opaque_));
+    return scope.Close(t->handle_);
+  }
   
-  return info.This();
+  return Undefined();
 }
 
 Persistent<FunctionTemplate> NCursor::Klass;
@@ -95,8 +108,11 @@ NCursor::Initialize(Handle<Object> target)
 
   NODE_SET_PROTOTYPE_METHOD(Klass, "visitChildren", Visit);
 
-  Klass->PrototypeTemplate()->SetAccessor(USR, StringGetter);
-  Klass->PrototypeTemplate()->SetAccessor(KIND, StringGetter);
+  Klass->PrototypeTemplate()->SetAccessor(USR, Getter);
+  Klass->PrototypeTemplate()->SetAccessor(SPELL, Getter);
+  Klass->PrototypeTemplate()->SetAccessor(DISPLAY, Getter);
+  Klass->PrototypeTemplate()->SetAccessor(KIND, Getter);
+  Klass->PrototypeTemplate()->SetAccessor(TYPE, Getter);
 
   target->Set(String::NewSymbol("cursor"), Klass->GetFunction());
 }

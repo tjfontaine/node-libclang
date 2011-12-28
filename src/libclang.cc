@@ -2,6 +2,7 @@
 #include "translation.h"
 #include "ncursor.h"
 #include "constants.h"
+#include "type.h"
 
 using namespace v8;
 using namespace node;
@@ -15,6 +16,7 @@ init (Handle<Object> target)
   Index::Initialize(target);
   TranslationUnit::Initialize(target);
   NCursor::Initialize(target);
+  Type::Initialize(target);
 }
 
 NODE_MODULE(libclang, init)

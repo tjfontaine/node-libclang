@@ -185,4 +185,65 @@ ConstantsInitialize(v8::Handle<v8::Object> target)
 
   target->Set(v8::String::NewSymbol("KINDS"), KINDS);
 
+  TYPES = v8::Persistent<v8::Object>(v8::Object::New());
+
+  NODE_DEFINE_CONSTANT(TYPES, CXType_Invalid);
+  NODE_DEFINE_CONSTANT(TYPES, CXType_Unexposed);
+  NODE_DEFINE_CONSTANT(TYPES, CXType_Void);
+  NODE_DEFINE_CONSTANT(TYPES, CXType_Bool);
+  NODE_DEFINE_CONSTANT(TYPES, CXType_Char_U);
+  NODE_DEFINE_CONSTANT(TYPES, CXType_UChar);
+  NODE_DEFINE_CONSTANT(TYPES, CXType_Char16);
+  NODE_DEFINE_CONSTANT(TYPES, CXType_Char32);
+  NODE_DEFINE_CONSTANT(TYPES, CXType_UShort);
+  NODE_DEFINE_CONSTANT(TYPES, CXType_UInt);
+  NODE_DEFINE_CONSTANT(TYPES, CXType_ULong);
+  NODE_DEFINE_CONSTANT(TYPES, CXType_ULongLong);
+  NODE_DEFINE_CONSTANT(TYPES, CXType_UInt128);
+  NODE_DEFINE_CONSTANT(TYPES, CXType_Char_S);
+  NODE_DEFINE_CONSTANT(TYPES, CXType_SChar);
+  NODE_DEFINE_CONSTANT(TYPES, CXType_WChar);
+  NODE_DEFINE_CONSTANT(TYPES, CXType_Short);
+  NODE_DEFINE_CONSTANT(TYPES, CXType_Int);
+  NODE_DEFINE_CONSTANT(TYPES, CXType_Long);
+  NODE_DEFINE_CONSTANT(TYPES, CXType_LongLong);
+  NODE_DEFINE_CONSTANT(TYPES, CXType_Int128);
+  NODE_DEFINE_CONSTANT(TYPES, CXType_Float);
+  NODE_DEFINE_CONSTANT(TYPES, CXType_Double);
+  NODE_DEFINE_CONSTANT(TYPES, CXType_LongDouble);
+  NODE_DEFINE_CONSTANT(TYPES, CXType_NullPtr);
+  NODE_DEFINE_CONSTANT(TYPES, CXType_Overload);
+  NODE_DEFINE_CONSTANT(TYPES, CXType_Dependent);
+  NODE_DEFINE_CONSTANT(TYPES, CXType_ObjCId);
+  NODE_DEFINE_CONSTANT(TYPES, CXType_ObjCClass);
+  NODE_DEFINE_CONSTANT(TYPES, CXType_ObjCSel);
+  NODE_DEFINE_CONSTANT(TYPES, CXType_Complex);
+  NODE_DEFINE_CONSTANT(TYPES, CXType_Pointer);
+  NODE_DEFINE_CONSTANT(TYPES, CXType_BlockPointer);
+  NODE_DEFINE_CONSTANT(TYPES, CXType_LValueReference);
+  NODE_DEFINE_CONSTANT(TYPES, CXType_RValueReference);
+  NODE_DEFINE_CONSTANT(TYPES, CXType_Record);
+  NODE_DEFINE_CONSTANT(TYPES, CXType_Enum);
+  NODE_DEFINE_CONSTANT(TYPES, CXType_Typedef);
+  NODE_DEFINE_CONSTANT(TYPES, CXType_ObjCInterface);
+  NODE_DEFINE_CONSTANT(TYPES, CXType_ObjCObjectPointer);
+  NODE_DEFINE_CONSTANT(TYPES, CXType_FunctionNoProto);
+  NODE_DEFINE_CONSTANT(TYPES, CXType_FunctionProto);
+  NODE_DEFINE_CONSTANT(TYPES, CXType_ConstantArray);
+  NODE_DEFINE_CONSTANT(TYPES, CXType_Vector);
+
+  /* Duplicates
+  CXType_FirstBuiltin = CXType_Void,
+  CXType_LastBuiltin  = CXType_ObjCSel,
+  */
+
+  props = TYPES->GetPropertyNames();
+  for (i = 0; i < props->Length(); i++)
+  {
+    v8::Local<v8::Value> key = props->Get(v8::Integer::New(i));
+    v8::Local<v8::Value> value = KINDS->Get(key);
+    TYPES->Set(value, key);
+  }
+
+  target->Set(v8::String::NewSymbol("TYPES"), TYPES);
 }
