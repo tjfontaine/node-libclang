@@ -1,3 +1,6 @@
+#include <string.h>
+#include <stdlib.h>
+
 #include "translation.h"
 #include "index.h"
 #include "ncursor.h"
@@ -42,8 +45,38 @@ TranslationUnit::Source(const Arguments &args)
   Index *i = ObjectWrap::Unwrap<Index>(args[0]->ToObject());
   String::Utf8Value s(args[1]->ToString());
 
-  char *argv[] = { "-I/usr/include/linux" };
-  tu->opaque_ = clang_createTranslationUnitFromSourceFile(i->opaque_, *s, 1, argv, 0, 0);
+  size_t argc;
+  char **argv;
+
+  if (args.Length() > 2 && args[2]->IsArray())
+  {
+    Local<Array> a = Local<Array>::Cast(args[2]);
+    size_t i;
+
+    argc = a->Length();
+    argv = new char*[argc + 1 + 1];
+    for (i = 0; i < argc; i++) {
+      String::Utf8Value b(a->Get(Integer::New(i))->ToString());
+      argv[i] = strdup(*b);
+    }
+  }
+  else
+  {
+    argc = 0;
+    argv = NULL;
+  }
+
+  tu->opaque_ = clang_createTranslationUnitFromSourceFile(i->opaque_, *s, argc, argv, 0, 0);
+
+  if (argc > 0)
+  {
+    size_t i;
+    for (i = 0; i < argc; i++)
+    {
+      free(argv[i]);
+    }
+    delete argv;
+  }
 
   return args.This();
 }

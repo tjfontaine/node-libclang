@@ -41,6 +41,14 @@ Type::GetArg(const Arguments &args)
   return scope.Close(nt->handle_);
 }
 
+Handle<Value>
+Type::IsPOD(const Arguments &args)
+{
+  HandleScope scope;
+  Type *t = ObjectWrap::Unwrap<Type>(args.This());
+  return scope.Close(Boolean::New(clang_isPODType(t->opaque_)));
+}
+
 static Handle<Value>
 Getter(Local<String> property, const AccessorInfo& info)
 {
@@ -100,6 +108,7 @@ Type::Initialize(Handle<Object> target)
   Klass->PrototypeTemplate()->SetAccessor(PTR, Getter);
 
   NODE_SET_PROTOTYPE_METHOD(t, "getArg", GetArg);
+  NODE_SET_PROTOTYPE_METHOD(t, "isPOD", IsPOD);
 
   target->Set(String::NewSymbol("type"), Klass->GetFunction());
 }

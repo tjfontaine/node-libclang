@@ -232,11 +232,6 @@ ConstantsInitialize(v8::Handle<v8::Object> target)
   NODE_DEFINE_CONSTANT(TYPES, CXType_ConstantArray);
   NODE_DEFINE_CONSTANT(TYPES, CXType_Vector);
 
-  /* Duplicates
-  CXType_FirstBuiltin = CXType_Void,
-  CXType_LastBuiltin  = CXType_ObjCSel,
-  */
-
   props = TYPES->GetPropertyNames();
   for (i = 0; i < props->Length(); i++)
   {
@@ -244,6 +239,9 @@ ConstantsInitialize(v8::Handle<v8::Object> target)
     v8::Local<v8::Value> value = KINDS->Get(key);
     TYPES->Set(value, key);
   }
+
+  NODE_DEFINE_CONSTANT(TYPES, CXType_FirstBuiltin);
+  NODE_DEFINE_CONSTANT(TYPES, CXType_LastBuiltin);
 
   target->Set(v8::String::NewSymbol("TYPES"), TYPES);
 }

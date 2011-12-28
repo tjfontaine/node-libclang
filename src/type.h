@@ -15,6 +15,7 @@ namespace nclang
     static Type* New(CXType ct);
     static v8::Persistent<v8::FunctionTemplate> Klass;
     static v8::Handle<v8::Value> GetArg(const v8::Arguments &args);
+    static v8::Handle<v8::Value> IsPOD(const v8::Arguments &args);
   };
 }
 
