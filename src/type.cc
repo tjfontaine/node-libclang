@@ -1,5 +1,6 @@
 #include "type.h"
 #include "nstring.h"
+#include "ncursor.h"
 
 using namespace v8;
 using namespace node;
@@ -8,6 +9,10 @@ using namespace nclang;
 #define KIND String::NewSymbol("kind")
 #define SPELL String::NewSymbol("spelling")
 #define RESULT String::NewSymbol("result")
+#define CANON String::NewSymbol("canonical")
+#define ARGC String::NewSymbol("argTypes")
+#define DECL String::NewSymbol("declaration")
+#define PTR String::NewSymbol("pointeeType")
 
 Type*
 Type::New(CXType ct)
@@ -27,6 +32,15 @@ Type::New(const Arguments &args)
   return args.This();
 }
 
+Handle<Value>
+Type::GetArg(const Arguments &args)
+{
+  HandleScope scope;
+  Type *t = ObjectWrap::Unwrap<Type>(args.This());
+  Type *nt = Type::New(clang_getArgType(t->opaque_, args[0]->Uint32Value()));
+  return scope.Close(nt->handle_);
+}
+
 static Handle<Value>
 Getter(Local<String> property, const AccessorInfo& info)
 {
@@ -40,6 +54,27 @@ Getter(Local<String> property, const AccessorInfo& info)
   else if (RESULT == property)
   {
     Type *nt = Type::New(clang_getResultType(t->opaque_));
+    return scope.Close(nt->handle_);
+  }
+  else if (CANON == property)
+  {
+    Type *nt = Type::New(clang_getCanonicalType(t->opaque_));
+    return scope.Close(nt->handle_);
+  }
+  else if (ARGC == property)
+  {
+    size_t count = clang_getNumArgTypes(t->opaque_);
+    Local<Value> nc = Integer::New(count);
+    return scope.Close(nc);
+  }
+  else if (DECL == property)
+  {
+    NCursor *c = NCursor::New(clang_getTypeDeclaration(t->opaque_));
+    return scope.Close(c->handle_);
+  }
+  else if (PTR == property)
+  {
+    Type *nt = Type::New(clang_getPointeeType(t->opaque_));
     return scope.Close(nt->handle_);
   }
 
@@ -59,6 +94,12 @@ Type::Initialize(Handle<Object> target)
   Klass->PrototypeTemplate()->SetAccessor(KIND, Getter);
   Klass->PrototypeTemplate()->SetAccessor(SPELL, Getter);
   Klass->PrototypeTemplate()->SetAccessor(RESULT, Getter);
+  Klass->PrototypeTemplate()->SetAccessor(CANON, Getter);
+  Klass->PrototypeTemplate()->SetAccessor(ARGC, Getter);
+  Klass->PrototypeTemplate()->SetAccessor(DECL, Getter);
+  Klass->PrototypeTemplate()->SetAccessor(PTR, Getter);
+
+  NODE_SET_PROTOTYPE_METHOD(t, "getArg", GetArg);
 
   target->Set(String::NewSymbol("type"), Klass->GetFunction());
 }

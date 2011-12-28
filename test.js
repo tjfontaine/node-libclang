@@ -7,15 +7,41 @@ tu.fromSource(idx, "/home/tjfontaine/.llvm/include/clang-c/Index.h");
 var curs = tu.cursor();
 
 var funcs = {};
-curs.visitChildren(function(parent) {
 
+//console.log(libclang.TYPES);
+
+var resolveType = function (t) {
+  switch (t.kind)
+  {
+    case libclang.TYPES.CXType_Typedef:
+      return t.declaration.spelling;
+      break;
+    case libclang.TYPES.CXType_Pointer:
+      return resolveType(t.pointeeType) + ' *';
+      break;
+    default:
+      return t.spelling;
+      break;
+  }
+};
+
+curs.visitChildren(function(parent) {
+  //return libclang.CXChildVisit_Break;
   switch (this.kind)
   {
     case libclang.KINDS.CXCursor_FunctionDecl:
-      console.log(this.usr, this.spelling, this.displayname, this.type.spelling);
-      var result = this.type.result;
-      console.log('result kind', result.kind, result.spelling); 
-      //return libclang.CXChildVisit_Break;
+      if (this.spelling.indexOf("clang_") == 0) {
+        var result = this.type.result;//.canonical;
+        console.log('theirs -->', resolveType(result), this.displayname); 
+        var args = []
+        var i;
+        for (i = 0; i < this.type.argTypes; i++) {
+          var arg = this.type.getArg(i);
+          args.push(resolveType(arg));
+        }
+        console.log('mine <--', resolveType(result), this.spelling, '(' + args.join(', ') + ')');
+        //return libclang.CXChildVisit_Break;
+      }
       break;
   }
 

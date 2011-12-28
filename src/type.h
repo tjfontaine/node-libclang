@@ -14,6 +14,7 @@ namespace nclang
     static v8::Handle<v8::Value> New(const v8::Arguments &args);
     static Type* New(CXType ct);
     static v8::Persistent<v8::FunctionTemplate> Klass;
+    static v8::Handle<v8::Value> GetArg(const v8::Arguments &args);
   };
 }
 
