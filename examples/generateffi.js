@@ -9,13 +9,13 @@ TYPE_FFI_MAP[libclang.TYPES.CXType_Bool] = 'byte';
 TYPE_FFI_MAP[libclang.TYPES.CXType_Char_U] = 'uchar';
 TYPE_FFI_MAP[libclang.TYPES.CXType_UChar] = 'uchar';
 TYPE_FFI_MAP[libclang.TYPES.CXType_UShort] = 'ushort';
-TYPE_FFI_MAP[libclang.TYPES.CXType_UInt] = 'uint';
+TYPE_FFI_MAP[libclang.TYPES.CXType_UInt] = 'uint32';
 TYPE_FFI_MAP[libclang.TYPES.CXType_ULong] = 'ulong';
 TYPE_FFI_MAP[libclang.TYPES.CXType_ULongLong] = 'ulonglong';
 TYPE_FFI_MAP[libclang.TYPES.CXType_Char_S] = 'char';
 TYPE_FFI_MAP[libclang.TYPES.CXType_SChar] = 'char';
 TYPE_FFI_MAP[libclang.TYPES.CXType_Short] = 'short';
-TYPE_FFI_MAP[libclang.TYPES.CXType_Int] = 'int';
+TYPE_FFI_MAP[libclang.TYPES.CXType_Int] = 'int32';
 TYPE_FFI_MAP[libclang.TYPES.CXType_Long] = 'long';
 TYPE_FFI_MAP[libclang.TYPES.CXType_LongLong] = 'longlong';
 TYPE_FFI_MAP[libclang.TYPES.CXType_Float] = 'float';
@@ -102,7 +102,7 @@ exports.generate = function (opts) {
 
     /* types should probably contain at least one type, and don't claim to support partially defined types */
     if (!mappedAbort && elements.length > 0) {
-      structs[type.spelling] = FFI.Struct([elements]);
+      structs[type.spelling] = FFI.Struct(elements);
       return structs[type.spelling];
     } else {
       return undefined;
@@ -208,7 +208,7 @@ var generateLibClang = function () {
     //console.log(result.types);
     /* TODO XXX FIXME -- this is failing for now when you have defined structs */
     var dynamic_clang = new FFI.Library('libclang', result.ffi);
-    var ver = dynamic_clang.clang_getVersion();
+    var ver = dynamic_clang.clang_getClangVersion();
     console.log(dynamic_clang.clang_getCString(ver));
     dynamic_clang.clang_disposeString(ver)
   });
