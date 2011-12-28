@@ -13,6 +13,7 @@ using namespace nclang;
 #define SPELL String::NewSymbol("spelling")
 #define DISPLAY String::NewSymbol("displayname")
 #define TYPE String::NewSymbol("type")
+#define ENUMTYPE String::NewSymbol("enumType")
 
 NCursor*
 NCursor::New(CXCursor cx)
@@ -91,6 +92,11 @@ Getter(Local<String> property, const AccessorInfo& info)
     Type *t = Type::New(clang_getCursorType(c->opaque_));
     return scope.Close(t->handle_);
   }
+  else if (ENUMTYPE == property)
+  {
+    Type *t = Type::New(clang_getEnumDeclIntegerType(c->opaque_));
+    return scope.Close(t->handle_);
+  }
   
   return Undefined();
 }
@@ -113,6 +119,7 @@ NCursor::Initialize(Handle<Object> target)
   Klass->PrototypeTemplate()->SetAccessor(DISPLAY, Getter);
   Klass->PrototypeTemplate()->SetAccessor(KIND, Getter);
   Klass->PrototypeTemplate()->SetAccessor(TYPE, Getter);
+  Klass->PrototypeTemplate()->SetAccessor(ENUMTYPE, Getter);
 
   target->Set(String::NewSymbol("cursor"), Klass->GetFunction());
 }
