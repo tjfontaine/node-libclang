@@ -21,6 +21,7 @@ TYPE_FFI_MAP[libclang.TYPES.CXType_LongLong] = 'longlong';
 TYPE_FFI_MAP[libclang.TYPES.CXType_Float] = 'float';
 TYPE_FFI_MAP[libclang.TYPES.CXType_Double] = 'double';
 TYPE_FFI_MAP[libclang.TYPES.CXType_Pointer] = 'pointer';
+TYPE_FFI_MAP[libclang.TYPES.CXType_ConstantArray] = 'pointer';
 
 /*
  * Accepts an object as defined below
@@ -72,8 +73,16 @@ exports.generate = function (opts) {
     var elements = [];
     var mappedAbort = false;
 
+    var first = true;
     type.visitChildren(function(parent) {
       try {
+        /* First item in the cursor is the one we started with?
+         * immediately move beyond it
+         */
+        if (first) {
+          first = false;
+          return libclang.CXChildVisit_Recurse;
+        }
         /* TODO XXX FIXME? 
          * If the current position of the cursor has an empty string, we're
          * probably still at the start of the struct/typedef
@@ -93,7 +102,7 @@ exports.generate = function (opts) {
           /* Add the field for the struct */
           elements.push([ t, this.spelling ]);
         }
-        return libclang.CXChildVisit_Recurse;
+        return libclang.CXChildVisit_Continue;
       } catch (err) {
         console.log(err.message);
         return libclang.CXChildVisit_Break;
@@ -102,6 +111,11 @@ exports.generate = function (opts) {
 
     /* types should probably contain at least one type, and don't claim to support partially defined types */
     if (!mappedAbort && elements.length > 0) {
+      /* we'll need something like this for serialization
+      console.log(type.spelling, '= FFI.Struct(');
+      console.log(elements);
+      console.log(');');
+      */
       structs[type.spelling] = FFI.Struct(elements);
       return structs[type.spelling];
     } else {
@@ -114,24 +128,37 @@ exports.generate = function (opts) {
     TODO XXX FIXME -- Still missing array support (but node-ffi is too)
   */
   var mapType = function (type) {
+    var ret;
     if (type.kind === libclang.TYPES.CXType_Pointer
         && type.pointeeType.kind === libclang.TYPES.CXType_Char_S)
-      return 'string';
-    else if (type.kind === libclang.TYPES.CXType_Typedef)
-    {
-      /* Handle the case where someone has simply redefined an existing type */
-      var canonical = mapType(type.canonical);
-      if (canonical)
-        return canonical;
-      /* If this is a struct try and create */
-      return defineType(type.declaration);
-    }
-    else if (type.kind === libclang.TYPES.CXType_Unexposed
-             && type.declaration.kind === libclang.KINDS.CXCursor_EnumDecl)
-      /* Special case enums so we can pass them around as integer type */
-      return mapType(type.declaration.enumType);
-    else /* Everything else that we know about should be handled by this, including opaque pointers */
-      return TYPE_FFI_MAP[type.kind];
+      ret = 'string';
+    else
+      switch (type.kind)
+      {
+        case libclang.TYPES.CXType_Typedef:
+          /* Handle the case where someone has simply redefined an existing type */
+          var canonical = mapType(type.canonical);
+          if (canonical)
+            ret = canonical;
+          else
+            /* If this is a struct try and create */
+            ret = defineType(type.declaration);
+          break;
+        case libclang.TYPES.CXType_Unexposed:
+          /* Special case enums so we can pass them around as integer type */
+          if (type.declaration.kind === libclang.KINDS.CXCursor_EnumDecl)
+            ret = mapType(type.declaration.enumType);
+          break;
+        case libclang.TYPES.CXType_Enum:
+            ret = mapType(type.declaration.enumType);
+            //ret = undefined;
+          break;
+        default:
+          ret = TYPE_FFI_MAP[type.kind];
+          break;
+      }
+
+    return ret;
   };
 
   /*
@@ -206,7 +233,6 @@ var generateLibClang = function () {
     //console.log(result.unmapped);
     //console.log(result.ffi);
     //console.log(result.types);
-    /* TODO XXX FIXME -- this is failing for now when you have defined structs */
     var dynamic_clang = new FFI.Library('libclang', result.ffi);
     var ver = dynamic_clang.clang_getClangVersion();
     console.log(dynamic_clang.clang_getCString(ver));
