@@ -1,0 +1,8 @@
+{
+  "name": "libclang",
+  "version": "0.0.1",
+  "main": "libclang",
+  "description": "Native bindings to libclang -- Generate FFI Bindings from header file",
+  "keywords": ["libclang", "ffi", "bindings"],
+  "author": "Timothy J Fontaine <tjfontaine@gmail.com>"
+}
