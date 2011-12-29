@@ -1,5 +1,5 @@
 var libclang = require('../libclang');
-var FFI = require('node-ffi');
+var util = require('util');
 
 
 /* libclang types to ffi names */
@@ -26,6 +26,8 @@ TYPE_FFI_MAP[libclang.TYPES.CXType_ConstantArray] = 'pointer';
 /*
  * Accepts an object as defined below
  * opts.filename -- required -- the full path to the header source file to parse 
+ * opts.library -- required -- the library ffi should use to dlopen
+ * opts.module -- optional -- the name of the module that will be exported (otherwise uses library name)
  * opts.prefix -- optional --  restrict imported functions to a given prefix
  * opts.includes -- optional -- a set of directory paths to aid type expansion
  * opts.compiler_args -- optional -- a set of clang command line options passed to the parser
@@ -36,11 +38,12 @@ TYPE_FFI_MAP[libclang.TYPES.CXType_ConstantArray] = 'pointer';
  *   arg -- the kind of type in question
  *   name -- the spelling of the function
  *   decl -- the method signature (excluding the result type)
- * ffi -- an object that is to be passed to FFI.Library
- * types -- an object where each key is a type defined for use with a function or another type
+ * serialized -- string representation of the types and module [eval or save]
  */
 exports.generate = function (opts) {
   var fname = opts.filename;
+  var library = opts.library;
+  var module = opts.module || opts.library;
   var prefix = opts.prefix || '';
   var includes = opts.includes || [];
   var compiler_args = [];
@@ -57,9 +60,17 @@ exports.generate = function (opts) {
 
   var curs = tu.cursor();
 
-  var ffidefs = {};
   var unmapped = [];
   var structs = {};
+  var serializer = '';
+
+  var sQuote = function (s) { return "'" + s + "'"; };
+  var StructType = function (name) { this.name = name; };
+  var PODType = function (name) { this.name = sQuote(name); };
+
+  for (key in TYPE_FFI_MAP) {
+    TYPE_FFI_MAP[key] = new PODType(TYPE_FFI_MAP[key]);
+  }
 
   /* For a given Typedef try and iterate fields and define an FFI struct */
   var defineType = function (type) {
@@ -111,17 +122,18 @@ exports.generate = function (opts) {
 
     /* types should probably contain at least one type, and don't claim to support partially defined types */
     if (!mappedAbort && elements.length > 0) {
-      /* we'll need something like this for serialization
-      console.log(type.spelling, '= FFI.Struct(');
-      console.log(elements);
-      console.log(');');
-      */
-      structs[type.spelling] = FFI.Struct(elements);
+      serializer += 'var ' + type.spelling + ' = exports.' + type.spelling + ' = FFI.Struct([';
+      elements.forEach(function(e) {
+        serializer += '[' + e[0].name + ", " + sQuote(e[1]) + "],";
+      });
+      serializer += ']);';
+      structs[type.spelling] = new StructType(type.spelling);
       return structs[type.spelling];
     } else {
       return undefined;
     }
   };
+
 
   /*
     Turn the libclang type into ffi type
@@ -131,7 +143,7 @@ exports.generate = function (opts) {
     var ret;
     if (type.kind === libclang.TYPES.CXType_Pointer
         && type.pointeeType.kind === libclang.TYPES.CXType_Char_S)
-      ret = 'string';
+      ret = new PODType('string');
     else
       switch (type.kind)
       {
@@ -140,8 +152,7 @@ exports.generate = function (opts) {
           var canonical = mapType(type.canonical);
           if (canonical)
             ret = canonical;
-          else
-            /* If this is a struct try and create */
+          else /* If this is a struct try and create */
             ret = defineType(type.declaration);
           break;
         case libclang.TYPES.CXType_Unexposed:
@@ -151,7 +162,6 @@ exports.generate = function (opts) {
           break;
         case libclang.TYPES.CXType_Enum:
             ret = mapType(type.declaration.enumType);
-            //ret = undefined;
           break;
         default:
           ret = TYPE_FFI_MAP[type.kind];
@@ -161,6 +171,8 @@ exports.generate = function (opts) {
     return ret;
   };
 
+
+  var serialize_body = 'exports.' + module + " = new FFI.Library('" + library + "', {";
   /*
    * Main source traversal -- We're mostly/only? concerned with wrapping functions
    * we could theoretically handle types here, but handling it by dependency means
@@ -182,6 +194,7 @@ exports.generate = function (opts) {
               })
               return libclang.CXChildVisit_Continue;
             }
+            result = result.name;
             var args = [];
             var i;
             var arg;
@@ -196,9 +209,10 @@ exports.generate = function (opts) {
                 })
                 return libclang.CXChildVisit_Continue;
               }
-              args.push(arg);
+              args.push(arg.name);
             }
-            ffidefs[this.spelling] = [ result, args ];
+            
+            serialize_body += this.spelling + ': [' + result + ', [' + args.join(', ') + ']],';
           }
           break;
       }
@@ -208,14 +222,14 @@ exports.generate = function (opts) {
       return libclang.CXChildVisit_Break;
     }
   });
+  serialize_body += '});';
 
   tu.dispose();
   idx.dispose();
 
   return {
-    ffi: ffidefs,
     unmapped: unmapped,
-    types: structs,
+    serialized: "var FFI = require('node-ffi');" + serializer + serialize_body,
   };
 };
 
@@ -227,16 +241,22 @@ var generateLibClang = function () {
     var includedir = out.replace(/\s+$/, '');
     var result = exports.generate({
       filename: path.join(includedir, 'clang-c', 'Index.h'),
+      library: 'libclang',
       prefix: 'clang_', 
     });
 
-    //console.log(result.unmapped);
-    //console.log(result.ffi);
-    //console.log(result.types);
-    var dynamic_clang = new FFI.Library('libclang', result.ffi);
-    var ver = dynamic_clang.clang_getClangVersion();
-    console.log(dynamic_clang.clang_getCString(ver));
-    dynamic_clang.clang_disposeString(ver)
+    if (result.unmapped.length > 0) {
+      console.log('----- UNMAPPED FUNCTIONS -----');
+      console.log(result.unmapped);
+      console.log('----- UNMAPPED FUNCTIONS -----');
+    }
+
+    var jsb = require('beautifyjs');
+    require('fs').writeFileSync(path.join(__dirname, 'dynamic_clang.js'), jsb.js_beautify(result.serialized));
+    var dynamic_clang = require(path.join(__dirname, 'dynamic_clang'));
+    var ver = dynamic_clang.libclang.clang_getClangVersion();
+    console.log(dynamic_clang.libclang.clang_getCString(ver));
+    dynamic_clang.libclang.clang_disposeString(ver)
   });
 }
 
