@@ -3,6 +3,7 @@
 #include "ncursor.h"
 #include "constants.h"
 #include "type.h"
+#include "location.h"
 
 using namespace v8;
 using namespace node;
@@ -17,6 +18,7 @@ init (Handle<Object> target)
   TranslationUnit::Initialize(target);
   NCursor::Initialize(target);
   Type::Initialize(target);
+  Location::Initialize(target);
 }
 
 NODE_MODULE(libclang, init)

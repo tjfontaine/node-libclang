@@ -1,5 +1,6 @@
 var libclang = require('../libclang');
 var util = require('util');
+var path = require('path');
 
 
 /* libclang types to ffi names */
@@ -41,12 +42,13 @@ TYPE_FFI_MAP[libclang.TYPES.CXType_ConstantArray] = 'pointer';
  * serialized -- string representation of the types and module [eval or save]
  */
 exports.generate = function (opts) {
-  var fname = opts.filename;
+  var fname = path.normalize(opts.filename);
   var library = opts.library;
   var module = opts.module || opts.library;
   var prefix = opts.prefix || '';
   var includes = opts.includes || [];
   var compiler_args = [];
+  var single_file = opts.single_file || false;
 
   if (opts.compiler_args) {
     compiler_args = opts.compiler_args.slice(0);
@@ -184,6 +186,10 @@ exports.generate = function (opts) {
       {
         case libclang.KINDS.CXCursor_FunctionDecl:
           if (this.spelling.indexOf(prefix) == 0) {
+            if (single_file && path.normalize(this.location.presumedLocation.filename) !== fname) {
+              return libclang.CXChildVisit_Continue;
+            }
+
             var result = mapType(this.type.result);
             if (!result) {
               unmapped.push({
@@ -235,7 +241,6 @@ exports.generate = function (opts) {
 
 var generateLibClang = function () {
   var exec = require('child_process').exec;
-  var path = require('path');
 
   exec('llvm-config --includedir', function (fail, out, err) {
     var includedir = out.replace(/\s+$/, '');

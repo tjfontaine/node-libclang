@@ -3,6 +3,7 @@
 #include "nstring.h"
 #include "constants.h"
 #include "type.h"
+#include "location.h"
 
 using namespace v8;
 using namespace node;
@@ -14,6 +15,7 @@ using namespace nclang;
 #define DISPLAY String::NewSymbol("displayname")
 #define TYPE String::NewSymbol("type")
 #define ENUMTYPE String::NewSymbol("enumType")
+#define LOC String::NewSymbol("location")
 
 NCursor*
 NCursor::New(CXCursor cx)
@@ -97,6 +99,11 @@ Getter(Local<String> property, const AccessorInfo& info)
     Type *t = Type::New(clang_getEnumDeclIntegerType(c->opaque_));
     return scope.Close(t->handle_);
   }
+  else if (LOC == property)
+  {
+    Location *l = Location::New(clang_getCursorLocation(c->opaque_));
+    return scope.Close(l->handle_);
+  }
   
   return Undefined();
 }
@@ -120,6 +127,7 @@ NCursor::Initialize(Handle<Object> target)
   Klass->PrototypeTemplate()->SetAccessor(KIND, Getter);
   Klass->PrototypeTemplate()->SetAccessor(TYPE, Getter);
   Klass->PrototypeTemplate()->SetAccessor(ENUMTYPE, Getter);
+  Klass->PrototypeTemplate()->SetAccessor(LOC, Getter);
 
   target->Set(String::NewSymbol("cursor"), Klass->GetFunction());
 }
