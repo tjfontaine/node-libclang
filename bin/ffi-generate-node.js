@@ -1,4 +1,6 @@
-var generate = require('../examples/generateffi').generate;
+#!/usr/bin/env node
+
+var generate = require('../lib/generateffi').generate;
 var jsb = require('beautifyjs');
 var argv = require('optimist')
   .usage('Generate node-ffi bindings for a given header file\nUsage: $0')
@@ -6,12 +8,14 @@ var argv = require('optimist')
   .demand('l').alias('l', 'library').describe('l', 'The name of the library to dlopen')
   .alias('m', 'module').describe('m', 'The name of module the bindings will be exported as')
   .boolean('x').alias('x', 'file_only').describe('x', 'Only export functions found in this file')
+  .alias('p', 'prefix').describe('p', 'Only import functions whose name start with prefix')
   .argv
 
 console.log(jsb.js_beautify(generate({
   filename: argv.f,
   library: argv.l,
   module: argv.m,
+  prefix: argv.p,
   compiler_args: argv._,
   single_file: argv.x,
 }).serialized));
