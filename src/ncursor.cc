@@ -39,6 +39,7 @@ NCursor::New(const Arguments &args)
 struct VisitorData
 {
   Persistent<Function> cb;
+  Persistent<Value> err;
 };
 
 static CXChildVisitResult
@@ -54,9 +55,17 @@ Visitor(CXCursor self, CXCursor parent, CXClientData data)
   Handle<Value> argv[1];
   argv[0] = p->handle_;
 
+  TryCatch ce;
   Local<Value> ret = vd->cb->Call(s->handle_, 1, argv);
 
-  return (CXChildVisitResult) ret->Uint32Value();
+  if (!ce.HasCaught())
+    return (CXChildVisitResult) ret->Uint32Value();
+  else
+  {
+    vd->err.Dispose();
+    vd->err = Persistent<Value>::New(ce.Exception());
+    return CXChildVisit_Break;
+  }
 }
 
 Handle<Value>
@@ -65,10 +74,26 @@ NCursor::Visit(const Arguments &args)
   HandleScope scope;
   NCursor *c = ObjectWrap::Unwrap<NCursor>(args.This());
   Local<Function> callback = Local<Function>::Cast(args[0]);
+
   struct VisitorData *data = (VisitorData *)malloc(sizeof(struct VisitorData));
   data->cb = Persistent<Function>::New(callback);
+  data->err = Persistent<Value>::New(Undefined());
+
   clang_visitChildren(c->opaque_, Visitor, data);
-  return args.This();
+
+  data->cb.Dispose();
+
+  if (!data->err->IsUndefined())
+  {
+    Local<Value> err = Local<Value>::New(data->err);
+    data->err.Dispose();
+    return ThrowException(err);
+  }
+  else
+  {
+    data->err.Dispose();
+    return args.This();
+  }
 }
 
 static Handle<Value>

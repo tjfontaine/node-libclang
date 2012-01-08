@@ -236,7 +236,7 @@ ConstantsInitialize(v8::Handle<v8::Object> target)
   for (i = 0; i < props->Length(); i++)
   {
     v8::Local<v8::Value> key = props->Get(v8::Integer::New(i));
-    v8::Local<v8::Value> value = KINDS->Get(key);
+    v8::Local<v8::Value> value = TYPES->Get(key);
     TYPES->Set(value, key);
   }
 
