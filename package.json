@@ -1,6 +1,6 @@
 {
   "name": "libclang",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "main": "libclang",
   "description": "Native bindings to libclang -- Generate FFI Bindings from header file",
   "keywords": ["libclang", "ffi", "bindings"],
@@ -9,7 +9,11 @@
     "ffi-generate-node": "bin/ffi-generate-node.js"
   },
   "dependencies": {
+    "beautifyjs": "",
+    "bindings": "",
+    "ffi": "",
     "optimist": "",
-    "beautifyjs": ""
+    "ref": "",
+    "ref-struct": ""
   }
 }

@@ -16,6 +16,8 @@ using namespace nclang;
 #define TYPE String::NewSymbol("type")
 #define ENUMTYPE String::NewSymbol("enumType")
 #define LOC String::NewSymbol("location")
+#define ENUMVALUE String::NewSymbol("enumValue")
+#define ENUMUVALUE String::NewSymbol("enumUValue")
 
 NCursor*
 NCursor::New(CXCursor cx)
@@ -129,6 +131,14 @@ Getter(Local<String> property, const AccessorInfo& info)
     Location *l = Location::New(clang_getCursorLocation(c->opaque_));
     return scope.Close(l->handle_);
   }
+  else if (ENUMVALUE == property)
+  {
+    return Number::New(clang_getEnumConstantDeclValue(c->opaque_));
+  }
+  else if (ENUMUVALUE == property)
+  {
+    return Number::New(clang_getEnumConstantDeclUnsignedValue(c->opaque_));
+  }
   
   return Undefined();
 }
@@ -153,6 +163,8 @@ NCursor::Initialize(Handle<Object> target)
   Klass->PrototypeTemplate()->SetAccessor(TYPE, Getter);
   Klass->PrototypeTemplate()->SetAccessor(ENUMTYPE, Getter);
   Klass->PrototypeTemplate()->SetAccessor(LOC, Getter);
+  Klass->PrototypeTemplate()->SetAccessor(ENUMVALUE, Getter);
+  Klass->PrototypeTemplate()->SetAccessor(ENUMUVALUE, Getter);
 
   target->Set(String::NewSymbol("cursor"), Klass->GetFunction());
 }
