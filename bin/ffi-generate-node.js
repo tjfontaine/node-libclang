@@ -11,11 +11,18 @@ var argv = require('optimist')
   .alias('p', 'prefix').describe('p', 'Only import functions whose name start with prefix')
   .argv
 
-console.log(jsb.js_beautify(generate({
+var ret = generate({
   filename: argv.f,
   library: argv.l,
   module: argv.m,
   prefix: argv.p,
   compiler_args: argv._,
   single_file: argv.x,
-}).serialized));
+});
+
+console.log(jsb.js_beautify(ret.serialized));
+
+if (generate.unmapped) {
+  process.stderr.write("-------Unmapped-------\r\n");
+  process.stderr.write(generate.unmapped + '\r\n');
+}
