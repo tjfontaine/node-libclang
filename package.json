@@ -1,6 +1,6 @@
 {
   "name": "libclang",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "main": "libclang",
   "description": "Native bindings to libclang -- Generate FFI Bindings from header file",
   "keywords": ["libclang", "ffi", "bindings"],
