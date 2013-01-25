@@ -9,6 +9,7 @@ var argv = require('optimist')
   .alias('m', 'module').describe('m', 'The name of module the bindings will be exported as')
   .boolean('x').alias('x', 'file_only').describe('x', 'Only export functions found in this file')
   .alias('p', 'prefix').describe('p', 'Only import functions whose name start with prefix')
+  .boolean('s').alias('s', 'strict').describe('s', 'Use StrictType (experimental)')
   .argv
 
 var ret = generate({
@@ -17,6 +18,7 @@ var ret = generate({
   module: argv.m,
   prefix: argv.p,
   compiler_args: argv._,
+  strict_type: argv.s,
   single_file: argv.x,
 });
 

@@ -37,6 +37,7 @@ suitable for use as a module.
  * m -- optional -- The module name underwhich functions will be stored (uses library name otherwise)
  * p -- optional -- Only include functions whose name starts with the provided prefix
  * x -- optional -- Restrict to only functions declared in the given header file
+ * s -- optional -- Use StrictType type wrapper (experimental)
 
 It may be necessary to pass additional flags to libclang so it can better parse
 the header (i.e. include paths). To pass options directly to libclang use `--`
