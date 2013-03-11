@@ -23,7 +23,6 @@ tu.cursor.visitChildren(function (parent) {
 });
 
 index.dispose();
-
 ````
 
 Generate FFI Bindings
