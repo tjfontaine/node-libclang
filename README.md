@@ -15,8 +15,7 @@ var tu = TranslationUnit.fromSource(idx, 'myLibrary.h', ['-I/path/to/my/project'
 
 tu.cursor.visitChildren(function (parent) {
   switch (this.kind) {
-    // any way to check for it without require('libclang/lib/dynamic_clang').CONSTANTS.CXCursorKind ???
-    case libclang.KINDS.CXCursor_FunctionDecl:
+    case Cursor.FunctionDecl:
       console.log(this.spelling);
       break;
   }
@@ -24,9 +23,6 @@ tu.cursor.visitChildren(function (parent) {
 });
 
 index.dispose();
-
-// dispose does not exists anymore?
-// tu.dispose();
 
 ````
 
