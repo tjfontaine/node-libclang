@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 var generate = require('../lib/generateffi').generate;
-var jsb = require('beautifyjs');
+var jsb = require('js-beautify');
 var argv = require('optimist')
   .usage('Generate node-ffi bindings for a given header file\nUsage: $0')
   .demand('f').alias('f', 'file').describe('f', 'The header file to parse')
