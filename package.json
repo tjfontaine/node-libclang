@@ -1,22 +1,14 @@
 {
   "name": "libclang",
-  "version": "0.0.8",
-  "main": "libclang",
-  "description": "Native bindings to libclang -- Generate FFI Bindings from header file",
+  "version": "0.0.9",
+  "main": "libclang.js",
+  "description": "Bindings to libclang",
   "keywords": ["libclang", "ffi", "bindings"],
   "author": "Timothy J Fontaine <tjfontaine@gmail.com>",
-  "main": "libclang.js",
-  "bin": {
-    "ffi-generate-node": "bin/ffi-generate-node.js"
-  },
   "dependencies": {
-    "js-beautify": "",
-    "bindings": "",
     "ffi": "",
-    "optimist": "",
     "ref": "",
     "ref-array": "",
-    "ref-strict": ">= v0.0.2",
     "ref-struct": ""
   }
 }
