@@ -5,6 +5,7 @@
   "description": "Bindings to libclang",
   "keywords": ["libclang", "ffi", "bindings"],
   "author": "Timothy J Fontaine <tjfontaine@gmail.com>",
+  "license": "MIT",
   "dependencies": {
     "ffi": "",
     "ref": "",
