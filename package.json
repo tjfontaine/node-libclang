@@ -1,9 +1,13 @@
 {
   "name": "libclang",
-  "version": "0.0.10",
+  "version": "0.0.11",
   "main": "libclang.js",
   "description": "Bindings to libclang",
-  "keywords": ["libclang", "ffi", "bindings"],
+  "keywords": [
+    "libclang",
+    "ffi",
+    "bindings"
+  ],
   "author": "Timothy J Fontaine <tjfontaine@gmail.com>",
   "license": "MIT",
   "dependencies": {
