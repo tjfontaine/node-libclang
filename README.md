@@ -6,23 +6,23 @@ AST Traversal
 -------------
 ```javascript
 var libclang = require('libclang');
+var Index = libclang.Index;
+var Cursor = libclang.Cursor;
+var TranslationUnit = libclang.TranslationUnit;
 
-var index = new libclang.index();
-var tu = new libclang.translationunit();
+var index = new Index(true, true);
+var tu = TranslationUnit.fromSource(idx, 'myLibrary.h', ['-I/path/to/my/project']);
 
-tu.fromSource(idx, 'myLibrary.h', ['-I/path/to/my/project']);
-
-tu.cursor().visitChildren(function (parent) {
+tu.cursor.visitChildren(function (parent) {
   switch (this.kind) {
-    case libclang.KINDS.CXCursor_FunctionDecl:
+    case Cursor.FunctionDecl:
       console.log(this.spelling);
       break;
   }
-  return libclang.CXChildVisit_Continue;
+  return Cursor.Continue;
 });
 
 index.dispose();
-tu.dispose();
 ````
 
 Generate FFI Bindings
