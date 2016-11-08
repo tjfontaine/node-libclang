@@ -1,19 +1,22 @@
 {
-  "name": "libclang",
-  "version": "0.0.11",
-  "main": "libclang.js",
-  "description": "Bindings to libclang",
-  "keywords": [
-    "libclang",
-    "ffi",
-    "bindings"
-  ],
-  "author": "Timothy J Fontaine <tjfontaine@gmail.com>",
-  "license": "MIT",
+  "name": "node-clang",
   "dependencies": {
     "ffi": "",
     "ref": "",
     "ref-array": "",
     "ref-struct": ""
-  }
+  },
+  "description": "Bindings to libclang based upon tjfontine/node-libclang",
+  "devDependencies": {},
+  "directories": {},
+  "keywords": [
+    "libclang",
+    "ffi",
+    "bindings"
+  ],
+  "license": "MIT",
+  "main": "index.js",
+  "optionalDependencies": {},
+  "readmeFilename": "README.md",
+  "version": "0.0.1"
 }
