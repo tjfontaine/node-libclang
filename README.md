@@ -7,22 +7,37 @@ AST Traversal
 ```javascript
 var libclang = require('libclang');
 
-var index = new libclang.index();
-var tu = new libclang.translationunit();
+var
+  Cursor = libclang.Cursor,
+  Index = libclang.Index,
+  TranslationUnit = libclang.TranslationUnit;
 
-tu.fromSource(idx, 'myLibrary.h', ['-I/path/to/my/project']);
+var dclang = require('./node_modules/libclang/lib/dynamic_clang');
+var consts = dclang.CONSTANTS;
 
-tu.cursor().visitChildren(function (parent) {
-  switch (this.kind) {
-    case libclang.KINDS.CXCursor_FunctionDecl:
-      console.log(this.spelling);
-      break;
-  }
-  return libclang.CXChildVisit_Continue;
+var index = new Index(true, true);
+var tu = new TranslationUnit.fromSource(index, '/path/to/my/sourcefile/myLibrary.h', [
+  '-xc++',
+]);
+ 
+tu.cursor.visitChildren(function (parent) {
+    if(this.spelling == "__llvm__") {
+        return;
+    } else {
+        console.log("Name = " + this.spelling);
+        console.log("Kind = " + consts.CXCursorKind[this.kind]);
+        console.log("Type = " + consts.CXTypeKind[this.type.kind]);
+        console.log("Line Number = " + this.location.presumedLocation.line);
+        console.log("Column Number = " + this.location.presumedLocation.column);
+        console.log("------------");
+        return Cursor.Recurse;
+    }
+
 });
 
 index.dispose();
-tu.dispose();
+tu.dispose;
+
 ````
 
 Generate FFI Bindings
