@@ -16,7 +16,7 @@ tu.cursor.visitChildren(function (parent) {
     break;
   }
 
-  return Clang.CXChildVisit_Continue;
+  return Clang.ChildVisitResult.Continue;
 });
 
 index.dispose();
