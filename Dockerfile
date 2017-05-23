@@ -2,8 +2,8 @@ FROM ubuntu:16.10
 
 MAINTAINER mattbudish
 
-# port 5858 = node debugger, 80 = HTTP
-EXPOSE 5858 80
+# port 9229 = node inspect, 80 = HTTP
+EXPOSE 9229 80
 
 # Set development environment as default
 ENV NODE_ENV development
@@ -40,7 +40,8 @@ RUN npm install --quiet -g node-gyp
 # Install node-libclang
 RUN mkdir -p /opt/node-libclang
 WORKDIR /opt/node-libclang
-COPY . /opt/node-libclang/
+COPY package.json /opt/node-libclang/
 RUN npm install --quiet && npm cache clean
+COPY . /opt/node-libclang/
 
 CMD bash
