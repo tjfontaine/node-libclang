@@ -1,5 +1,5 @@
 {
-  "name": "node-libclang",
+  "name": "node-clang",
   "dependencies": {
     "ffi": "",
     "ref": "",

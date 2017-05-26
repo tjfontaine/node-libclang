@@ -1,4 +1,4 @@
-node-libclang
+node-clang
 ==========
 node.js module for `libclang` and parsing c-style source from javascript.
 
