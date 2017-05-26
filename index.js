@@ -19,7 +19,7 @@
 // THE SOFTWARE
 'use strict';
 
-const Clang     = require('./lib/clang-c');
+const Clang     = require('./lib/dynamic_clang');
 const Consts    = Clang.CONSTANTS;
 
 // Hybrid export map: Common.js with ES6 module structure
@@ -30,7 +30,7 @@ const exportMap = {
   TranslationUnit:require('./lib/translation-unit').TranslationUnit,
   Type:           require('./lib/type').Type,
   Location:       require('./lib/location').Location,
-  Token:          require('./lib/token').Token,
+  Tokens:         require('./lib/tokens').Tokens,
 };
 
 exportMap.default = exportMap;
@@ -80,7 +80,6 @@ exportMap.default = exportMap;
  *          ForwardRef, ...
  */
 Object.keys(Consts).forEach(function (ckey) {
-    if (ckey.length < 1)    { return; }
     let   baseKey   = ckey.replace(/^CX_?/, '');
     const map       = {};
     const baseParts = baseKey.split('_');
@@ -103,23 +102,6 @@ Object.keys(Consts).forEach(function (ckey) {
 
     exportMap[baseKey] = map;
 });
-
-/* Generate a simplified interface to libclang.clang_* methods:
- *      libclang.clang_getClangVersion()    => getClangVersion()
- */
-Object.keys(Clang.libclang).forEach(function (ckey) {
-    if (! ckey.startsWith('clang_'))    { return; }
-
-    const val   = Clang.libclang[ckey];
-    //console.log('Clang.libclang: %s ( %s )', ckey, typeof(val));
-    if (typeof(val) !== 'function')      { return; }
-
-    let methodName    = ckey.replace(/^clang_(?:CX([^X]))?/, '$1');
-    methodName = methodName[0].toLowerCase() + methodName.slice(1);
-    exportMap[methodName] = val;
-
-});
-
 
 // Hybrid export: Common.js with ES6 module structure
 module.exports = exportMap;
