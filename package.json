@@ -9,7 +9,7 @@
   },
   "description": "Bindings to libclang based upon tjfontine/node-libclang",
   "devDependencies": {
-    "ffi-generate": ""
+    "node-ffi-generate": ""
   },
   "directories": {},
   "keywords": [
