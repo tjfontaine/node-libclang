@@ -4,13 +4,10 @@
     "ffi": "",
     "ref": "",
     "ref-array": "",
-    "ref-struct": "",
-    "ref-union": "^1.0.1"
+    "ref-struct": ""
   },
   "description": "Bindings to libclang based upon tjfontine/node-libclang",
-  "devDependencies": {
-    "node-ffi-generate": ""
-  },
+  "devDependencies": {},
   "directories": {},
   "keywords": [
     "libclang",
