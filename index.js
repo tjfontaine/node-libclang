@@ -27,7 +27,7 @@ const exportMap = {
   __esModule:     true,
   Cursor:         require('./lib/cursor').Cursor,
   Index:          require('./lib/index').Index,
-  TranslationUnit:require('./lib/translation-unit').TranslationUnit,
+  TranslationUnit:require('./lib/translationunit').TranslationUnit,
   Type:           require('./lib/type').Type,
   Location:       require('./lib/location').Location,
   Tokens:         require('./lib/tokens').Tokens,
