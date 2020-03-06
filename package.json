@@ -11,10 +11,10 @@
   "author": "Timothy J Fontaine <tjfontaine@gmail.com>",
   "license": "MIT",
   "dependencies": {
-    "ffi": "",
-    "ref": "",
-    "ref-array": "",
-    "ref-struct": "",
-    "ref-union": ""
+    "ffi-napi": "^2.4.6",
+    "ref-array-di": "^1.2.1",
+    "ref-napi": "^1.4.3",
+    "ref-struct-di": "^1.1.0",
+    "ref-union-di": "^1.0.1"
   }
 }
