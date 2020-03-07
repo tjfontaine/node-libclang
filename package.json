@@ -14,6 +14,7 @@
     "ffi": "",
     "ref": "",
     "ref-array": "",
-    "ref-struct": ""
+    "ref-struct": "",
+    "ref-union": ""
   }
 }
