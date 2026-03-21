@@ -1,3 +1,5 @@
+> **⚠️ This project is archived and no longer maintained.**
+
 node-libclang
 =============
 node.js module for libclang and parsing c-style source from javascript
