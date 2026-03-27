@@ -3,3 +3,4 @@ build/
 libclang.node
 *.swp
 node_modules
+.DS_Store
